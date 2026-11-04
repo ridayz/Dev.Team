@@ -1,63 +1,45 @@
 # Dev.Team
 
-Markas kerja pengembangan. Semua proyek dikerjakan dari sini.
+**Markas kerja pengembangan** — tempat agent, skills, dan proyek dikumpulkan dalam satu tempat untuk OpenCode.
 
-```
-Dev.Team/
-├── AGENTS.md              ← aturan main, dibaca otomatis agent
-├── README.md              ← panduan untuk manusia
-├── .opencode/
-│   ├── agents/            ← definisi agent
-│   └── skills/            ← skill (archify, unslop, ...)
-├── projects/              ← proyek aktif + selesai (dengan status)
-├── templates/             ← cetakan proyek baru
-├── docs/                  ← diagram, keputusan, catatan lintas
-├── scripts/               ← helper
-└── .gitignore
-```
+> `Dev.Team — markas kerja: agent, skills, proyek, templates, docs, scripts. Untuk OpenCode.`
+
+## Apa isi repo
+
+| Folder / File | Isi |
+| --- | --- |
+| `.opencode/agents/` | Definisi agent (`dev-team.md`) |
+| `.opencode/skills/` | Skill terpasang (`archify`, `unslop`) |
+| `projects/` | Proyek aktif + status (dengan tabel indeks) |
+| `templates/` | Cetakan proyek baru (`new-project`) |
+| `docs/` | Catatan lintas proyek: desain, keputusan, diagram |
+| `scripts/` | Helper: `new-project.sh`, `index-projects.sh` |
+| `AGENTS.md` | Aturan main — dibaca otomatis agent |
+| `README.md` | Panduan ini |
 
 ## Cara pakai
 
-1. Buka folder **Dev.Team** di OpenCode.
+1. Buka folder **Dev.Team** di OpenCode (bukan subfolder-nya).
 2. Pilih agent **Dev.Team** (atau panggil dari agent utama).
-3. Perintah umum:
-
-```bash
-./scripts/new-project.sh nama-proyek   # buat proyek baru dari template
-./scripts/index-projects.sh           # perbarui indeks proyek
-```
+3. Untuk task spesifik, panggil skill lewat tool `skill` dengan ID-nya:
+   - `archify` — diagram & explainer satu halaman
+   - `unslop` — rapikan UI yang kelihatan AI-generated
+4. Buat proyek baru:
+   ```bash
+   ./scripts/new-project.sh nama-proyek
+   ./scripts/index-projects.sh
+   ```
 
 ## Skill
 
-Diisi lewat tool `skill` dengan ID (nama folder, case-sensitive):
-
 | ID | Kegunaan |
 | --- | --- |
-| `archify` | Diagram arsitektur/workflow/sequence/data-flow/lifecycle/ERD/tree/timeline/waterfall sebagai HTML interaktif, plus explainer satu halaman. |
+| `archify` | Diagram arsitektur/workflow/sequence/data-flow/lifecycle/ERD/tree/timeline/waterfall + explainer satu halaman. |
 | `unslop` | Merapikan UI yang terlihat "AI-generated". |
 
-Muat hanya saat relevan. Jika pengguna menyebut skill, muat dulu sebelum mulai.
+Skill di-load lewat tool `skill`. AGENTS.md tidak me-load skill — AGENTS.md hanya instruksi konteks.
 
-## Membuat proyek
+## Status
 
-```bash
-./scripts/new-project.sh toko-online
-# edit projects/toko-online/README.md
-# kerjakan di projects/toko-online/src/
-# update status + ./scripts/index-projects.sh
-```
-
-## Menambah skill baru
-
-1. Ambil dari GitHub: repo → tarball → `.opencode/skills/<id>/SKILL.md`.
-2. Tambahkan ke tabel di `dev-team.md`.
-3. Jangan taruh di dalam `projects/*/` — harus di root markas.
-
-## Aturan penting
-
-- Jangan buat `.opencode/` di dalam `projects/*/`.
-- Jangan ubah `.opencode/skills/` kecuali memasang/mengganti.
-- Jangan hapus proyek yang sudah ada; tandai `selesai` / `parkir`.
-- Jangan taruh rahasia / file besar di markas.
-
-Lihat `AGENTS.md` untuk aturan lengkap.
+- **ter-push** ke GitHub: `ridayz/Dev.Team` (branch `main`)
+- Ditambahkan: 2026-11-04
