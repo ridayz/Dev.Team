@@ -1,0 +1,25 @@
+# Kode & dependency
+node_modules/
+dist/
+build/
+out/
+.next/
+.cache/
+*.log
+
+# Environment & rahasia
+.env
+.env.*
+!.env.example
+
+# OS & editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# File besar yang tidak perlu masuk repo
+*.zip
+*.tar.gz
+*.iso
