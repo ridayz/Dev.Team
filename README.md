@@ -1,45 +1,45 @@
 # Dev.Team
 
-**Markas kerja pengembangan** — tempat agent, skills, dan proyek dikumpulkan dalam satu tempat untuk OpenCode.
+**Development Work HQ** — a place where agents, skills, and projects live together for OpenCode.
 
-> `Dev.Team — markas kerja: agent, skills, proyek, templates, docs, scripts. Untuk OpenCode.`
+> Dev.Team — development work headquarters: agent, skills, projects, templates, docs, scripts. For OpenCode.
 
-## Apa isi repo
+## What's Inside
 
-| Folder / File | Isi |
+| Path | Purpose |
 | --- | --- |
-| `.opencode/agents/` | Definisi agent (`dev-team.md`) |
-| `.opencode/skills/` | Skill terpasang (`archify`, `unslop`) |
-| `projects/` | Proyek aktif + status (dengan tabel indeks) |
-| `templates/` | Cetakan proyek baru (`new-project`) |
-| `docs/` | Catatan lintas proyek: desain, keputusan, diagram |
-| `scripts/` | Helper: `new-project.sh`, `index-projects.sh` |
-| `AGENTS.md` | Aturan main — dibaca otomatis agent |
-| `README.md` | Panduan ini |
+| `.opencode/agents/` | Agent definitions (`dev-team.md`) |
+| `.opencode/skills/` | Installed skills (`archify`, `unslop`) |
+| `projects/` | Active projects + status index |
+| `templates/` | New project template (`new-project`) |
+| `docs/` | Cross-project notes: design, decisions, diagrams |
+| `scripts/` | Helpers: `new-project.sh`, `index-projects.sh` |
+| `AGENTS.md` | Main rules — auto-read by agents |
+| `README.md` | This guide |
 
-## Cara pakai
+## How to Use
 
-1. Buka folder **Dev.Team** di OpenCode (bukan subfolder-nya).
-2. Pilih agent **Dev.Team** (atau panggil dari agent utama).
-3. Untuk task spesifik, panggil skill lewat tool `skill` dengan ID-nya:
-   - `archify` — diagram & explainer satu halaman
-   - `unslop` — rapikan UI yang kelihatan AI-generated
-4. Buat proyek baru:
+1. Open the **Dev.Team** folder in OpenCode (not subfolders).
+2. Pick the **Dev.Team** agent (or call it from the main agent).
+3. For specific tasks, load the skill via the `skill` tool with its ID:
+   - `archify` — one-page diagrams & explainer
+   - `unslop` — clean up AI-looking UI
+4. Create a new project:
    ```bash
-   ./scripts/new-project.sh nama-proyek
+   ./scripts/new-project.sh <project-name>
    ./scripts/index-projects.sh
    ```
 
-## Skill
+## Skills
 
-| ID | Kegunaan |
+| ID | Purpose |
 | --- | --- |
-| `archify` | Diagram arsitektur/workflow/sequence/data-flow/lifecycle/ERD/tree/timeline/waterfall + explainer satu halaman. |
-| `unslop` | Merapikan UI yang terlihat "AI-generated". |
+| `archify` | Architecture / workflow / sequence / data-flow / lifecycle / ERD / tree / timeline / waterfall + explainer. |
+| `unslop` | Clean up UI that looks AI-generated. |
 
-Skill di-load lewat tool `skill`. AGENTS.md tidak me-load skill — AGENTS.md hanya instruksi konteks.
+Skills are loaded via the `skill` tool. `AGENTS.md` does not load skills — it only holds context.
 
 ## Status
 
-- **ter-push** ke GitHub: `ridayz/Dev.Team` (branch `main`)
-- Ditambahkan: 2026-11-04
+- **Pushed** to GitHub: `ridayz/Dev.Team` (branch `main`)
+- Added: 2026-11-04

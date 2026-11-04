@@ -1,11 +1,11 @@
-# Catatan lintas proyek
+# Cross-Project Notes
 
-Catatan singkat yang relevan untuk beberapa proyek, atau hal teknis yang janggal
-kalau disembunyikan di proyek mana pun.
+Short notes that are relevant across projects, or technical bits too vague to put
+in any single project.
 
-Nama format: `catatan-<topik>.md`.
+File format: `note-<topic>.md`.
 
-Contoh isi:
-- Konteks teknis lintas proyek
-- Hal yang dipelajari dari proyek sebelumnya
-- Hal yang perlu diingat antar tim/pengembang
+Example content:
+- Cross-project technical context
+- Learnings from previous projects
+- Things to remember across teams/developers

@@ -1,9 +1,8 @@
 # Diagrams
 
-Hasil diagram dari skill `archify`.
+Diagrams from the `archify` skill.
 
-- Nama file: `<proyek>-<jenis>.html`
-- Contoh: `toko-online-arsitektur.html`, `api-flow.html`
-- Lokasi: root markas, di folder ini.
-- Jangan simpan diagram kecuali dipakai. Setelah dipakai, simpan di sini dan
-  referensikan di `docs/`.
+- File name: `<project>-<type>.html`
+- Example: `toko-online-architecture.html`, `api-flow.html`
+- Location: repo root, in this folder.
+- Don't save diagrams unless used. After use, save here and reference in `docs/`.

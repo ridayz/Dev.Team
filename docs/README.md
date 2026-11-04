@@ -1,17 +1,17 @@
 # docs/
 
-Tempat catatan yang tidak masuk ke dalam proyek.
+Place for notes that stay outside projects.
 
-## Isi
+## Contents
 
-| Folder | Isi |
+| Folder | Contents |
 | --- | --- |
-| `decisions/` | Catatan keputusan arsitektur (format: `NNNN-judul.md`). |
-| `diagrams/` | Hasil diagram dari skill `archify`. Nama: `<proyek>-<jenis>.html`. |
-| `notes/` | Catatan lintas proyek, hal teknis yang mudah lupa. |
+| `decisions/` | Architecture decision notes (format: `NNNN-title.md`). |
+| `diagrams/` | Diagrams from the `archify` skill (file: `<project>-<type>.html`). |
+| `notes/` | Cross-project notes / technical notes worth remembering. |
 
-## Catatan penting
+## Important
 
-- Catatan **proyek spesifik** (tujuan, status, catatan fitur) disimpan di
-  `projects/<nama-proyek>/README.md`, **bukan** di `docs/`.
-- Diagram dan keputusan bisa jadi lintas proyek, jadi di `docs/`.
+- Project-specific notes (purpose, status, feature notes) live in
+  `projects/<project>/README.md`, **not** in `docs/`.
+- Diagrams and decisions can be cross-project, so they go in `docs/`.

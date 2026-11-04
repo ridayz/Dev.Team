@@ -1,86 +1,85 @@
-# AGENTS.md — Aturan Markas Dev.Team
+# AGENTS.md — Dev.Team Rules
 
-File ini dibaca otomatis oleh setiap agent di folder ini. Isinya aturan main, bukan
-dokumentasi. Kalau ragu, ikuti file ini.
+This file is auto-read by every agent in this folder. It holds the main rules, not documentation. If unsure, follow this file.
 
-## Peta markas
+## Workspace Map
 
 ```
 Dev.Team/
-├── AGENTS.md              ← kamu di sini (aturan)
-├── README.md              ← panduan untuk manusia
+├── AGENTS.md              ← here (rules)
+├── README.md              ← human guide
 ├── .opencode/
-│   ├── agents/            ← definisi agent
-│   └── skills/            ← skill (archify, unslop, ...)
-├── projects/              ← semua proyek
-│   ├── README.md          ← indeks + status
-│   └── <nama-proyek>/
-│       ├── README.md      ← tujuan, status, cara jalan
-│       ├── src/           ← kode
-│       ├── tests/         ← test
-│       └── docs/          ← catatan khusus proyek ini
-├── templates/new-project/ ← cetakan proyek baru
+│   ├── agents/            ← agent definitions
+│   └── skills/            ← skills (archify, unslop, ...)
+├── projects/              ← all projects
+│   ├── README.md          ← index + status
+│   └── <project-name>/
+│       ├── README.md      ← purpose, status, how to run
+│       ├── src/           ← code
+│       ├── tests/         ← tests
+│       └── docs/          ← project-specific notes
+├── templates/new-project/ ← new project template
 ├── docs/
-│   ├── decisions/         ← kenapa memilih A bukan B
-│   ├── diagrams/          ← hasil skill archify
-│   └── notes/             ← catatan lintas proyek
-└── scripts/               ← helper (new-project.sh)
+│   ├── decisions/         ← why a decision was made
+│   ├── diagrams/          ← archify results
+│   └── notes/             ← cross-project notes
+└── scripts/               ← helpers (new-project.sh)
 ```
 
-## Aturan penempatan file
+## File Placement Rules
 
-| Jenis file | Taruh di | Jangan di |
+| File type | Put in | Don't put in |
 | --- | --- | --- |
-| Kode aplikasi | `projects/<nama>/src/` | root markas |
-| Test | `projects/<nama>/tests/` | `src/` |
-| Catatan proyek | `projects/<nama>/docs/` | `docs/` root |
-| Diagram (archify) | `docs/diagrams/` | dalam proyek |
-| Keputusan arsitektur | `docs/decisions/` | README proyek |
-| Script bantu | `scripts/` | `src/` |
-| Skill baru | `.opencode/skills/<id>/SKILL.md` | dalam proyek |
+| App code | `projects/<project>/src/` | repo root |
+| Tests | `projects/<project>/tests/` | `src/` |
+| Project notes | `projects/<project>/docs/` | root `docs/` |
+| Diagrams (archify) | `docs/diagrams/` | inside project |
+| Architecture decisions | `docs/decisions/` | project README |
+| Helper scripts | `scripts/` | `src/` |
+| New skill | `.opencode/skills/<id>/SKILL.md` | inside project |
 
-## Aturan yang tidak boleh dilanggar
+## Hard Rules
 
-1. **Jangan buat `.opencode/` di dalam `projects/*/`.** Satu `.opencode` di root sudah berlaku untuk semua.
-2. **Jangan ubah `.opencode/skills/`** kecuali sedang memasang atau mengganti skill.
-3. **Jangan hapus proyek** yang sudah ada. Tandai `selesai` atau `parkir` di indeks.
-4. **Jangan taruh rahasia** (`.env`, token, password) di repo. Pakai `.env.example`.
-5. **Jangan taruh file besar** (ISO, zip, video) di markas. Simpan di luar.
+1. **Do not create `.opencode/` inside `projects/*/`.** One `.opencode` at root already applies to all.
+2. **Do not change `.opencode/skills/`** unless installing or replacing a skill.
+3. **Do not delete existing projects.** Mark them `done` or `paused` in the index.
+4. **Do not put secrets** (`.env`, token, password) in the repo. Use `.env.example`.
+5. **Do not put large files** (ISO, zip, video) in the HQ. Store outside.
 
-## Cara kerja yang diharapkan
+## Expected Workflow
 
-1. Baca `projects/README.md` dulu untuk tahu konteks.
-2. Baca `README.md` proyek yang disentuh.
-3. Kalau pekerjaan lebih dari 3 langkah, tulis rencana singkat dulu.
-4. Kerjakan per bagian, verifikasi tiap bagian.
-5. Perbarui status di `projects/README.md` setelah selesai.
+1. Read `projects/README.md` first for context.
+2. Read the README of the project being touched.
+3. If the work is more than 3 steps, write a short plan first.
+4. Work in parts, verify each part.
+5. Update status in `projects/README.md` after done.
 
-## Konvensi penamaan
+## Naming Conventions
 
-| Item | Format | Contoh |
+| Item | Format | Example |
 | --- | --- | --- |
-| Folder proyek | huruf kecil, tanda hubung | `toko-online` |
-| File kode | sesuai bahasa | `checkout.ts` |
-| Catatan | `kebab-case.md` | `rencana-checkout.md` |
-| Keputusan | `NNNN-judul.md` | `0001-pakai-postgres.md` |
-| Diagram | `<proyek>-<jenis>.html` | `toko-online-arsitektur.html` |
+| Project folder | lowercase, hyphenated | `toko-online` |
+| Code file | per language | `checkout.ts` |
+| Note | `kebab-case.md` | `rencana-checkout.md` |
+| Decision | `NNNN-title.md` | `0001-use-postgres.md` |
+| Diagram | `<project>-<type>.html` | `toko-online-architecture.html` |
 
-## Status proyek
+## Project Statuses
 
-`rencana` → `dikerjakan` → `review` → `selesai` / `parkir`
+`idea` → `in-progress` → `review` → `done` / `paused`
 
-## Skill
+## Skills
 
-- Skill di-load lewat tool `skill` dengan ID (nama folder, case-sensitive).
-- AGENTS.md tidak me-load skill. AGENTS.md hanya instruksi konteks penggunaan.
-- Skill baru: taruh di `.opencode/skills/<id>/SKILL.md`, lalu daftarkan di `dev-team.md`.
-- Muat hanya saat relevan. Kalau pengguna menyebut skill, muat dulu sebelum mulai.
+- Skills are loaded via the `skill` tool with the ID (folder name, case-sensitive).
+- `AGENTS.md` does not load skills. It only holds context.
+- New skill: put it in `.opencode/skills/<id>/SKILL.md`, then register it in `dev-team.md`.
+- Load only when relevant. If the user mentions a skill, load it before starting.
 
-## Definisi "selesai"
+## Done Definition
 
-Sebuah tugas dianggap selesai kalau:
-- kode jalan tanpa error,
-- test/lint lulus (kalau ada),
-- `README.md` proyek diperbarui,
-- status di `projects/README.md` diperbarui,
-- pengguna bisa menjalankannya sendiri dari instruksi yang ada.
+A task is done when:
+- Code runs without error,
+- tests/lint pass (if any),
+- project `README.md` updated,
+- status in `projects/README.md` updated,
+- user can run it themselves from the instructions.

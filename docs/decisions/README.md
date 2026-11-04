@@ -1,25 +1,25 @@
-# Catatan keputusan arsitektur
+# Architecture Decision Notes
 
-Format: `NNNN-judul.md` dengan angka urut.
+Format: `NNNN-title.md` with sequential numbers.
 
 ```
-0001-judul-keputusan.md
-0002-judul-keputusan.md
+0001-title-decision.md
+0002-title-decision.md
 ```
 
-Isi minimal setiap keputusan:
+Minimal content per decision:
 
 ```markdown
-# NNNN. Judul keputusan
+# NNNN. Decision title
 
-- **Tanggal:** YYYY-MM-DD
-- **Status:** diterima | ditolak | revisi
-- **Konteks:** kenapa keputusan ini dipikirkan
-- **Pilihan:** apa yang dipilih
-- **Alasan:** alasannya
-- **Konsekuensi:** apa dampaknya
+- **Date:** YYYY-MM-DD
+- **Status:** accepted | rejected | revising
+- **Context:** why this decision was considered
+- **Choice:** what was chosen
+- **Reason:** why
+- **Consequence:** impact
 ```
 
 Rules:
-- Satu keputusan per file.
-- Nomor urut mengikuti urutan keputusan, jangan diisi manual — pakai `0001-...`, `0002-...` sesuai urutan.
+- One decision per file.
+- Numbers follow decision order; don't fill manually — use `0001-...`, `0002-...` accordingly.

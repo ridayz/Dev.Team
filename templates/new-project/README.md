@@ -1,33 +1,35 @@
-# Nama Proyek
+# New Project Template
 
 | | |
 | --- | --- |
-| **Status** | `rencana` |
-| **Dibuat** | YYYY-MM-DD |
-| **Terakhir disentuh** | YYYY-MM-DD |
+| **Status** | `idea` |
+| **Created** | YYYY-MM-DD |
+| **Last touched** | YYYY-MM-DD |
 
-## Tujuan
-Satu paragraf: masalah apa yang diselesaikan, untuk siapa, dan kenapa penting.
+## Purpose
+One paragraph: the problem being solved, for whom, and why it matters.
 
-## Cara menjalankan
+## How to Run
 ```bash
-# isi perintahnya di sini
+# put the command here
 ```
 
-## Struktur
+## Structure
 ```
-src/      kode utama
-tests/    test
-docs/     catatan khusus proyek ini
+src/      main code
+tests/    tests
+docs/     project-specific notes
 ```
 
-## Yang sudah jalan
+## Done
+
 - [ ] ...
 
-## Yang belum
+## Not Done
+
 - [ ] ...
 
-## Keputusan penting
-| Tanggal | Keputusan | Alasan |
+## Key Decisions
+| Date | Decision | Reason |
 | --- | --- | --- |
 | | | |
