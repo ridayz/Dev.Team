@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Backbone Core Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .core-cell { aspect-ratio: 1; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-radius: 4px; border: 1px solid; cursor: pointer; transition: all 0.15s; user-select: none; }
+    .core-available { background: #fff; color: #cbd5e1; border-color: #e2e8f0; }
+    .core-available:hover { background: #dbeafe; color: #2563eb; border-color: #3b82f6; }
+    .core-used { background: #334155; color: #fff; border-color: #475569; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+    .sidebar-collapsed { transform: translateX(-100%); transition: transform 0.2s; }
+    .sidebar-open { transform: translateX(0); }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900">
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+    <div class="flex items-center justify-between px-4 lg:px-8 py-3">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="app.goTo('dashboard')">
+        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16c0-1.886 0-2.828 0.536-3.774a2 2 0 0 1 0.254-0.477c0.28-0.28 0.557-0.428 0.825-0.497a3 3 0 0 1 0.757-0.067c0.88 0 1.544 0.559 1.907 1.266a7 7 0 0 1 2.534 2.534c0.707 0.363 1.266 1.027 1.266 1.907a3 3 0 0 1-0.067 0.757c0.069 0.268-0.217 0.545-0.497 0.825a2 2 0 0 1-0.477 0.254C5.828 18.996 4.886 20 3 20s-2.886-1.004-3-2.886c0-0.377 0-0.565 0.053-0.749a2 2 0 0 1 0.152-0.381c0.087-0.161 0.186-0.296 0.312-0.407"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM9.663 17h4.673M17 7h-2.661M12.521 3.514l1.383-1.383a1 1 0 011.414 0l1.595 1.595a1 1 0 010 1.414l-1.595 1.595a1 1 0 01-1.414 0l-1.383-1.383a1 1 0 010-1.414zM21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div>
+          <h1 class="font-bold text-indigo-700 text-sm">Backbone Core</h1>
+          <p class="text-[10px] text-slate-500">Dark Fiber Management</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="app.refresh()" class="px-3 py-1.5 border border-slate-300 rounded-md text-xs text-slate-600 hover:bg-slate-50 transition flex items-center gap-1">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          Segarkan
+        </button>
+        <button onclick="app.toggleSidebar()" class="md:hidden text-slate-600 hover:text-slate-900">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="pt-16 lg:pt-0 relative">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-slate-50 border-r border-slate-200 sidebar-collapsed">
+      <div class="p-4 border-b border-slate-200">
+        <h2 class="font-bold text-xs text-slate-700 uppercase tracking-wider">Menu</h2>
+      </div>
+      <nav class="flex-1 overflow-y-auto py-2">
+        <button onclick="app.goTo('dashboard')" class="nav-item flex items-center gap-3 px-4 py-3 text-sm transition border-l-2 bg-indigo-50 border-indigo-500 text-indigo-700 font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1M7 20h4v-2H7z"/></svg>
+          Dashboard
+        </button>
+        <button onclick="app.goTo('cables')" class="nav-item flex items-center gap-3 px-4 py-3 text-sm transition border-l-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20a7 7 0 00-2.54-6.033L19.13 5.179a2.683 2.683 0 013.602 0l0.574 0.947A2 2 0 0123 7v16a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h1.22c0.744 0 1.427 0.338 1.883 0.878l1.334 1.167c0.206 0.18 0.299 0.45 0.249 0.734a1 1 0 01-0.734 0.734c-0.284-0.05-0.555-0.043-0.734-0.249L3.34 6.878a3 3 0 00-0.878-1.883H3a3 3 0 00-3 3v11c0 1.308 0.819 2.431 2.002 2.865zM13 11h4m-2-4h4m-2-4h-2"/></svg>
+          Kabel Backbone
+        </button>
+        <button onclick="app.goTo('tenants')" class="nav-item flex items-center gap-3 px-4 py-3 text-sm transition border-l-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          Tenant Dark Fiber
+        </button>
+        <button onclick="app.goTo('allocations')" class="nav-item flex items-center gap-3 px-4 py-3 text-sm transition border-l-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2 2zm0-14V3m0 0V3m0 0a2 2 0 002-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 00-2 2zm0 14v2a2 2 0 01-2 2H7a2 2 0 01-2-2v-2a2 2 0 012-2h2a2 2 0 002-2z"/></svg>
+          Alokasi Core
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Overlay for mobile -->
+    <div id="overlay" class="fixed inset-0 z-20 bg-black/50 hidden md:hidden" onclick="app.toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 p-4 lg:p-8">
+      <!-- Dashboard -->
+      <section id="view-dashboard" class="space-y-6">
+        <div>
+          <h2 class="text-xl font-bold text-slate-800">Dashboard</h2>
+          <p class="text-slate-500 text-sm">Ringkasan manajemen core kabel backbone & dark fiber tenant.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <p class="text-xs text-slate-500 uppercase font-semibold mb-1">Kabel Backbone</p>
+            <p class="text-2xl font-bold text-slate-800" id="stat-cables">-</p>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <p class="text-xs text-slate-500 uppercase font-semibold mb-1">Total Core</p>
+            <p class="text-2xl font-bold text-slate-800" id="stat-total">-</p>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <p class="text-xs text-slate-500 uppercase font-semibold mb-1">Core Terpakai</p>
+            <p class="text-2xl font-bold text-orange-600" id="stat-used">-</p>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <p class="text-xs text-slate-500 uppercase font-semibold mb-1">Core Tersedia</p>
+            <p class="text-2xl font-bold text-green-600" id="stat-avail">-</p>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <p class="text-xs text-slate-500 uppercase font-semibold mb-1">Tenant</p>
+            <p class="text-2xl font-bold text-purple-600" id="stat-tenants">-</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <h3 class="font-bold text-slate-700 mb-4">Utilisasi per Kabel</h3>
+            <div class="h-64">
+              <canvas id="chart-bar"></canvas>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex items-center justify-center">
+            <canvas id="chart-pie" width="200" height="200"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+          <h3 class="font-bold text-slate-700 mb-4">Daftar Kabel</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead class="text-slate-500 uppercase text-xs">
+                <tr>
+                  <th class="pb-3 font-semibold">Nama</th>
+                  <th class="pb-3 font-semibold text-center">Total Core</th>
+                  <th class="pb-3 font-semibold text-center">Terpakai</th>
+                  <th class="pb-3 font-semibold text-center">Tersedia</th>
+                  <th class="pb-3 font-semibold text-center">Utilisasi</th>
+                  <th class="pb-3 font-semibold">Rute</th>
+                </tr>
+              </thead>
+              <tbody id="table-cables" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cables -->
+      <section id="view-cables" class="hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-bold text-slate-800">Kabel Backbone</h2>
+          <button onclick="app.openModal('modal-cable')" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Tambah Kabel
+          </button>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                <tr>
+                  <th class="px-6 py-3 font-semibold text-left">Nama</th>
+                  <th class="px-6 py-3 font-semibold text-center">Total Core</th>
+                  <th class="px-6 py-3 font-semibold text-center">Status</th>
+                  <th class="px-6 py-3 font-semibold text-left">Rute</th>
+                  <th class="px-6 py-3 font-semibold text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="table-cable-list" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tenants -->
+      <section id="view-tenants" class="hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-bold text-slate-800">Tenant Dark Fiber</h2>
+          <button onclick="app.openModal('modal-tenant')" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Tambah Tenant
+          </button>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                <tr>
+                  <th class="px-6 py-3 font-semibold text-left">Nama</th>
+                  <th class="px-6 py-3 font-semibold text-left">PIC</th>
+                  <th class="px-6 py-3 font-semibold text-left">Kontak</th>
+                  <th class="px-6 py-3 font-semibold text-center">Status</th>
+                  <th class="px-6 py-3 font-semibold text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="table-tenant-list" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Allocations -->
+      <section id="view-allocations" class="hidden space-y-6">
+        <h2 class="text-xl font-bold text-slate-800">Alokasi Core</h2>
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                <tr>
+                  <th class="px-6 py-3 font-semibold text-left">Tenant</th>
+                  <th class="px-6 py-3 font-semibold text-left">Kabel</th>
+                  <th class="px-6 py-3 font-semibold text-center">Core</th>
+                  <th class="px-6 py-3 font-semibold text-left">Tujuan</th>
+                  <th class="px-6 py-3 font-semibold text-center">Mulai</th>
+                  <th class="px-6 py-3 font-semibold text-center">Selesai</th>
+                  <th class="px-6 py-3 font-semibold text-center">Status</th>
+                  <th class="px-6 py-3 font-semibold text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="table-alloc-list" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Cable Detail Panel (slide-in) -->
+  <div id="panel-core" class="fixed inset-y-0 right-0 z-40 w-full lg:w-[560px] bg-white border-l border-slate-200 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="flex items-center justify-between p-5 border-b border-slate-200 bg-slate-50">
+      <h3 class="font-bold text-lg text-slate-800" id="panel-title">Core Kabel</h3>
+      <button onclick="app.closePanel()" class="text-slate-400 hover:text-slate-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-white">
+      <span class="text-sm text-slate-600" id="panel-subtitle"></span>
+      <button onclick="app.openAllocFromPanel()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md text-sm flex items-center gap-1">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Alokasi Core
+      </button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-4">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-4 space-y-4">
+          <div class="bg-white rounded-xl border border-slate-200 p-4">
+            <p class="text-xs text-slate-500 uppercase font-semibold mb-2">Ringkasan</p>
+            <div class="space-y-2">
+              <div class="flex justify-between"><span class="text-sm text-slate-600">Total Core</span><span class="font-medium" id="panel-total">-</span></div>
+              <div class="flex justify-between"><span class="text-sm text-slate-600">Terpakai</span><span class="font-medium text-orange-600" id="panel-used">-</span></div>
+              <div class="flex justify-between"><span class="text-sm text-slate-600">Tersedia</span><span class="font-medium text-green-600" id="panel-avail">-</span></div>
+            </div>
+            <div class="mt-3">
+              <div class="w-full bg-slate-200 rounded-full h-2"><div id="panel-progress" class="bg-indigo-500 h-2 rounded-full" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="lg:col-span-8">
+          <div class="bg-white rounded-xl border border-slate-200 p-4">
+            <p class="text-xs text-slate-500 uppercase font-semibold mb-3">Grid Core</p>
+            <div class="grid grid-cols-12 sm:grid-cols-16 md:grid-cols-24 lg:grid-cols-32 gap-1 p-1" id="grid-cores"></div>
+            <p class="mt-3 text-xs text-slate-400 text-center">Klik core kosong untuk alokasi · Klik core terpakai untuk release</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div id="modal-backdrop" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden" onclick="app.closeActiveModal()"></div>
+
+  <!-- Cable Modal -->
+  <div id="modal-cable" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-2xl w-full max-w-md border border-slate-200">
+        <div class="p-6 border-b border-slate-100">
+          <h3 class="font-bold text-lg text-slate-800">Tambah Kabel Backbone</h3>
+        </div>
+        <form onsubmit="app.saveCable(event)" class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Nama Kabel</label>
+            <input id="cable-name" class="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Contoh: Backbone-Jakarta-Bandung" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Total Core</label>
+            <select id="cable-total" class="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+              <option value="96">96 Core</option>
+              <option value="288">288 Core</option>
+              <option value="576">576 Core</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Rute</label>
+            <input id="cable-route" class="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Contoh: Jakarta - Bandung via Purwakarta" />
+          </div>
+          <div class="flex justify-end gap-2 pt-4">
+            <button type="button" onclick="app.closeModal('modal-cable')" class="text-slate-600 hover:bg-slate-100 px-4 py-2 rounded-md text-sm">Batal</button>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tenant Modal -->
+  <div id="modal-tenant" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-2xl w-full max-w-md border border-slate-200">
+        <div class="p-6 border-b border-slate-100">
+          <h3 class="font-bold text-lg text-slate-800">Tambah Tenant</h3>
+        </div>
+        <form onsubmit="app.saveTenant(event)" class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Nama Tenant</label>
+            <input id="tenant-name" class="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Contoh: PT Dark Fiber Indonesia" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">PIC</label>
+            <input id="tenant-pic" class="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="PIC" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Kontak</label>
+            <input id="tenant-contact" class="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="email@perusahaan.co.id" />
+          </div>
+          <div class="flex justify-end gap-2 pt-4">
+            <button type="button" onclick="app.closeModal('modal-tenant')" class="text-slate-600 hover:bg-slate-100 px-4 py-2 rounded-md text-sm">Batal</button>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Allocation Modal -->
+  <div id="modal-alloc" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-2xl w-full max-w-md border border-slate-200">
+        <div class="p-6 border-b border-slate-100">
+          <h3 class="font-bold text-lg text-slate-800">Alokasi Core ke Tenant</h3>
+          <p class="text-xs text-slate-500 mt-1" id="alloc-subtitle"></p>
+        </div>
+        <form onsubmit="app.saveAlloc(event)" class="p-6 space-y-4">
+          <input type="hidden" id="alloc-cable-id" />
+          <input type="hidden" id="alloc-core-number" />
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Tenant</label>
+            <select id="alloc-tenant" class="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+              <option value="">-- Pilih Tenant --</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Tujuan / Keterangan</label>
+            <input id="alloc-purpose" class="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Contoh: Dark Fiber Lease / Internet Dedicated" />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">Tanggal Mulai</label>
+              <input type="date" id="alloc-start" class="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">Tanggal Selesai</label>
+              <input type="date" id="alloc-end" class="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" />
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 pt-4">
+            <button type="button" onclick="app.closeModal('modal-alloc')" class="text-slate-600 hover:bg-slate-100 px-4 py-2 rounded-md text-sm">Batal</button>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm">Alokasikan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Backend berjalan di http://localhost:4000 (via ./run.sh)
+    const API = 'http://localhost:4000/api';
+    const COLORS = ['#EF4444','#F97316','#F59E0B','#84CC16','#22C55E','#10B981','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#8B5CF6'];
+
+    async function req(path, opts = {}) {
+      const res = await fetch(API + path, {
+        headers: { 'Content-Type': 'application/json', ...opts.headers },
+        ...opts,
+        body: opts.body ? JSON.stringify(opts.body) : undefined,
+      });
+      return res.json();
+    }
+
+    const app = {
+      data: { cables: [], tenants: [], allocations: [], cores: [], selectedCable: null },
+      charts: {},
+
+      async init() {
+        await this.loadAll();
+        this.renderSidebar();
+        this.goTo('dashboard');
+      },
+
+      async loadAll() {
+        try {
+          const [cables, tenants, allocs] = await Promise.all([
+            req('/cables'), req('/tenants'), req('/allocations'),
+          ]);
+          this.data.cables = cables;
+          this.data.tenants = tenants;
+          this.data.allocations = allocs;
+        } catch (e) {
+          console.error(e);
+        }
+      },
+
+      toggleSidebar() {
+        const el = document.getElementById('sidebar');
+        const ov = document.getElementById('overlay');
+        const open = el.classList.contains('sidebar-open');
+        el.className = open ? 'fixed inset-y-0 left-0 z-30 w-64 bg-slate-50 border-r border-slate-200 sidebar-collapsed' :
+          'fixed inset-y-0 left-0 z-30 w-64 bg-slate-50 border-r border-slate-200 sidebar-open';
+        ov.className = open ? 'fixed inset-0 z-20 bg-black/50 hidden md:hidden' : 'fixed inset-0 z-20 bg-black/50 md:hidden';
+      },
+
+      goTo(page) {
+        document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+        document.getElementById('view-' + page).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(b => {
+          b.className = b.className.replace(/bg-indigo-50 border-indigo-500 text-indigo-700/, 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border-l-2');
+        });
+        eventTarget = document.querySelector(`button[onclick="app.goTo('${page}')"]`);
+        if (eventTarget) {
+          eventTarget.className = eventTarget.className.replace(/text-slate-600/, 'text-indigo-700').replace(/hover:bg-slate-100 hover:text-slate-900/, 'bg-indigo-50 border-indigo-500');
+        }
+        if (page === 'dashboard') this.renderDashboard();
+        if (page === 'cables') this.renderCables();
+        if (page === 'tenants') this.renderTenants();
+        if (page === 'allocations') this.renderAllocations();
+        this.toggleSidebar();
+      },
+
+      async refresh() {
+        await this.loadAll();
+        const page = [...document.querySelectorAll('section')].find(s => !s.classList.contains('hidden')).id.replace('view-', '');
+        this.goTo(page);
+      },
+
+      renderDashboard() {
+        const { cables, tenants } = this.data;
+        const totalCables = cables.length;
+        const totalCores = cables.reduce((s, c) => s + c.total_core, 0);
+        const totalUsed = cables.reduce((s, c) => s + (c.used_core || 0), 0);
+        const totalAvail = totalCores - totalUsed;
+        document.getElementById('stat-cables').textContent = totalCables;
+        document.getElementById('stat-total').textContent = totalCores;
+        document.getElementById('stat-used').textContent = totalUsed;
+        document.getElementById('stat-avail').textContent = totalAvail;
+        document.getElementById('stat-tenants').textContent = tenants.length;
+
+        // table
+        const tbody = document.getElementById('table-cables');
+        tbody.innerHTML = cables.map(c => {
+          const used = c.used_core || 0;
+          const avail = c.available_core || 0;
+          const pct = c.total_core ? Math.round((used / c.total_core) * 100) : 0;
+          return `<tr class="hover:bg-slate-50 transition cursor-pointer" onclick="app.openPanel(${c.id})">
+            <td class="py-3 font-medium text-slate-700">${c.name}</td>
+            <td class="py-3 text-center">${c.total_core}</td>
+            <td class="py-3 text-center text-orange-600 font-medium">${used}</td>
+            <td class="py-3 text-center text-green-600 font-medium">${avail}</td>
+            <td class="py-3 text-center"><div class="w-full bg-slate-200 rounded-full h-2"><div class="bg-indigo-500 h-2 rounded-full" style="width:${pct}%"></div></div><span class="text-xs text-slate-500 block">${pct}%</span></td>
+            <td class="py-3 text-slate-500">${c.route || '-'}</td>
+          </tr>`;
+        }).join('');
+
+        // charts
+        this.renderCharts(cables, totalUsed, totalAvail);
+      },
+
+      renderCharts(cables, totalUsed, totalAvail) {
+        // Bar chart
+        const barCtx = document.getElementById('chart-bar').getContext('2d');
+        if (this.charts.bar) this.charts.bar.destroy();
+        this.charts.bar = new Chart(barCtx, {
+          type: 'bar',
+          data: {
+            labels: cables.map(c => c.name.length > 14 ? c.name.slice(0, 11) + '...' : c.name),
+            datasets: [
+              { label: 'Tersedia', data: cables.map(c => c.available_core || 0), backgroundColor: '#10B981', borderRadius: 4 },
+              { label: 'Terpakai', data: cables.map(c => c.used_core || 0), backgroundColor: '#3B82F6', borderRadius: 4 },
+            ],
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+            scales: { x: { ticks: { font: { size: 11 } } }, y: { beginAtZero: true, ticks: { font: { size: 11 } } } },
+          },
+        });
+
+        // Pie chart
+        const pieCtx = document.getElementById('chart-pie').getContext('2d');
+        if (this.charts.pie) this.charts.pie.destroy();
+        this.charts.pie = new Chart(pieCtx, {
+          type: 'doughnut',
+          data: { labels: ['Tersedia', 'Terpakai'], datasets: [{ data: [totalAvail, totalUsed], backgroundColor: ['#10B981', '#3B82F6'] }] },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } },
+        });
+      },
+
+      async renderCables() {
+        const cables = await req('/cables');
+        this.data.cables = cables;
+        const tbody = document.getElementById('table-cable-list');
+        tbody.innerHTML = cables.map(c => `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="px-6 py-4 font-medium text-slate-700">${c.name}</td>
+            <td class="px-6 py-4 text-center">${c.total_core}</td>
+            <td class="px-6 py-4 text-center"><span class="px-2 py-1 rounded-full text-xs font-medium ${c.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'}">${c.status}</span></td>
+            <td class="px-6 py-4 text-slate-500">${c.route || '-'}</td>
+            <td class="px-6 py-4 text-right"><button onclick="app.openPanel(${c.id})" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Lihat Core →</button></td>
+          </tr>
+        `).join('');
+      },
+
+      async renderTenants() {
+        const tenants = await req('/tenants');
+        this.data.tenants = tenants;
+        const tbody = document.getElementById('table-tenant-list');
+        tbody.innerHTML = tenants.map(t => `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="px-6 py-4 font-medium text-slate-700">${t.name}</td>
+            <td class="px-6 py-4 text-slate-500">${t.pic || '-'}</td>
+            <td class="px-6 py-4 text-slate-500">${t.contact || '-'}</td>
+            <td class="px-6 py-4 text-center"><span class="px-2 py-1 rounded-full text-xs font-medium ${t.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'}">${t.status}</span></td>
+            <td class="px-6 py-4 text-right">
+              <button onclick="app.deleteTenant(${t.id})" class="text-red-600 hover:text-red-800 text-sm">Hapus</button>
+            </td>
+          </tr>
+        `).join('');
+        // fill alloc tenant select
+        const sel = document.getElementById('alloc-tenant');
+        sel.innerHTML = '<option value="">-- Pilih Tenant --</option>' + tenants.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+      },
+
+      async renderAllocations() {
+        const allocs = await req('/allocations');
+        this.data.allocations = allocs;
+        const tbody = document.getElementById('table-alloc-list');
+        tbody.innerHTML = allocs.map(a => `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="px-6 py-4 font-medium text-slate-700">${a.tenant_name}</td>
+            <td class="px-6 py-4 text-slate-500">${a.cable_name}</td>
+            <td class="px-6 py-4 text-center font-mono">${a.core_number}</td>
+            <td class="px-6 py-4 text-slate-500">${a.purpose || '-'}</td>
+            <td class="px-6 py-4 text-center text-slate-500">${a.start_date || '-'}</td>
+            <td class="px-6 py-4 text-center text-slate-500">${a.end_date || '-'}</td>
+            <td class="px-6 py-4 text-center"><span class="px-2 py-1 rounded-full text-xs font-medium ${a.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'}">${a.status}</span></td>
+            <td class="px-6 py-4 text-right"><button onclick="app.releaseAlloc(${a.id})" class="text-red-600 hover:text-red-800 text-sm">Release</button></td>
+          </tr>
+        `).join('');
+      },
+
+      async openPanel(cableId) {
+        const cable = this.data.cables.find(c => c.id == cableId) || (await req(`/cables/${cableId}`));
+        this.data.selectedCable = cable;
+        document.getElementById('panel-title').textContent = cable.name;
+        document.getElementById('panel-subtitle').textContent = `${cable.total_core} core · ${cable.route || '-'}`;
+        const cores = await req(`/cores?cable_id=${cable.id}`);
+        this.data.cores = cores;
+        this.renderPanelCore(cable, cores);
+        document.getElementById('panel-core').classList.remove('translate-x-full');
+      },
+
+      closePanel() {
+        document.getElementById('panel-core').classList.add('translate-x-full');
+      },
+
+      renderPanelCore(cable, cores) {
+        const used = cores.filter(c => c.status === 'used').length;
+        const avail = cores.filter(c => c.status === 'available').length;
+        const total = cable.total_core;
+        document.getElementById('panel-total').textContent = total;
+        document.getElementById('panel-used').textContent = used;
+        document.getElementById('panel-avail').textContent = avail;
+        document.getElementById('panel-progress').style.width = total ? `${(used / total) * 100}%` : '0%';
+
+        const grid = document.getElementById('grid-cores');
+        grid.innerHTML = cores.map(core => {
+          const isUsed = core.status === 'used';
+          const color = COLORS[(core.core_number - 1) % COLORS.length];
+          const cls = isUsed ? 'core-used' : `core-available`;
+          const style = !isUsed ? `border-color:${color}; color:${color};` : '';
+          return `<div class="${cls}" style="${style}" title="Core ${core.core_number} - ${isUsed ? 'Terpakai (' + (core.tenant_name || '-') + ')' : 'Tersedia'}" onclick="app.handleCoreClick(${core.id}, ${isUsed})">${core.core_number}</div>`;
+        }).join('');
+      },
+
+      async handleCoreClick(coreId, isUsed) {
+        if (isUsed) {
+          if (!confirm('Release core ini?')) return;
+          const core = this.data.cores.find(c => c.id === coreId);
+          await req(`/allocations/${core.id}`, { method: 'DELETE' });
+        } else {
+          const core = this.data.cores.find(c => c.id === coreId);
+          document.getElementById('alloc-cable-id').value = core.cable_id;
+          document.getElementById('alloc-core-number').value = core.core_number;
+          document.getElementById('alloc-subtitle').textContent = `Kabel: ${this.data.selectedCable.name} · Core #${core.core_number}`;
+          document.getElementById('alloc-tenant').value = '';
+          document.getElementById('alloc-purpose').value = '';
+          document.getElementById('alloc-start').value = '';
+          document.getElementById('alloc-end').value = '';
+          this.openModal('modal-alloc');
+        }
+      },
+
+      openAllocFromPanel() {
+        this.closePanel();
+        // handled via handleCoreClick instead; keep for compatibility
+      },
+
+      // ---------- Modals ----------
+      openModal(id) {
+        document.getElementById('modal-backdrop').classList.remove('hidden');
+        document.getElementById(id).classList.remove('hidden');
+      },
+      closeModal(id) {
+        document.getElementById(id).classList.add('hidden');
+        document.getElementById('modal-backdrop').classList.add('hidden');
+      },
+      closeActiveModal() {
+        document.querySelectorAll('.fixed.inset-0.z-50.hidden').forEach(el => el.classList.add('hidden'));
+        document.getElementById('modal-backdrop').classList.add('hidden');
+        document.getElementById('modal-cable').classList.add('hidden');
+        document.getElementById('modal-tenant').classList.add('hidden');
+        document.getElementById('modal-alloc').classList.add('hidden');
+      },
+
+      async saveCable(e) {
+        e.preventDefault();
+        const body = {
+          name: document.getElementById('cable-name').value,
+          total_core: document.getElementById('cable-total').value,
+          route: document.getElementById('cable-route').value,
+          status: 'active',
+        };
+        try {
+          await req('/cables', { method: 'POST', body });
+          this.closeModal('modal-cable');
+          e.target.reset();
+          await this.loadAll();
+          this.renderCables();
+          this.renderDashboard();
+        } catch (err) { alert('Gagal: ' + (err.error || err.message)); }
+      },
+
+      async saveTenant(e) {
+        e.preventDefault();
+        const body = {
+          name: document.getElementById('tenant-name').value,
+          pic: document.getElementById('tenant-pic').value,
+          contact: document.getElementById('tenant-contact').value,
+          status: 'active',
+        };
+        try {
+          await req('/tenants', { method: 'POST', body });
+          this.closeModal('modal-tenant');
+          e.target.reset();
+          await this.loadAll();
+          this.renderTenants();
+          this.renderDashboard();
+        } catch (err) { alert('Gagal: ' + (err.error || err.message)); }
+      },
+
+      async saveAlloc(e) {
+        e.preventDefault();
+        const body = {
+          tenant_id: document.getElementById('alloc-tenant').value,
+          cable_id: document.getElementById('alloc-cable-id').value,
+          core_number: document.getElementById('alloc-core-number').value,
+          purpose: document.getElementById('alloc-purpose').value,
+          start_date: document.getElementById('alloc-start').value,
+          end_date: document.getElementById('alloc-end').value || null,
+        };
+        try {
+          await req('/allocations', { method: 'POST', body });
+          this.closeModal('modal-alloc');
+          await this.loadAll();
+          if (this.data.selectedCable) {
+            const cores = await req(`/cores?cable_id=${this.data.selectedCable.id}`);
+            this.renderPanelCore(this.data.selectedCable, cores);
+          }
+          this.renderDashboard();
+          this.renderAllocations();
+        } catch (err) { alert('Gagal: ' + (err.error || err.message)); }
+      },
+
+      async deleteTenant(id) {
+        if (!confirm('Hapus tenant ini?')) return;
+        await req(`/tenants/${id}`, { method: 'DELETE' });
+        await this.loadAll();
+        this.renderTenants();
+        this.renderDashboard();
+      },
+
+      async releaseAlloc(id) {
+        if (!confirm('Release alokasi ini?')) return;
+        await req(`/allocations/${id}`, { method: 'PATCH', body: { status: 'released' } });
+        await this.loadAll();
+        if (this.data.selectedCable) {
+          const cores = await req(`/cores?cable_id=${this.data.selectedCable.id}`);
+          this.renderPanelCore(this.data.selectedCable, cores);
+        }
+        this.renderDashboard();
+        this.renderAllocations();
+      },
+    };
+
+    // Chart.js via CDN
+    (function loadChart() {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+      s.onload = () => app.init();
+      document.head.appendChild(s);
+    })();
+
+    let eventTarget;
+  </script>
+</body>
+</html>

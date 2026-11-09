@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proxy Rotator Dashboard v2.0</title>
+  <script src="/static/js/alpine.min.js" defer></script>
+  <style>
+    :root {
+      --bg-900: #0f172a; --bg-800: #1e293b; --bg-700: #334155; --bg-600: #475569;
+      --accent: #3b82f6; --accent-d: #2563eb;
+      --green: #22c55e; --yellow: #eab308; --red: #ef4444; --cyan: #06b6d4;
+      --text: #e2e8f0; --muted: #64748b; --white: #f8fafc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-900); color: var(--text); font-family: 'Courier New', monospace; font-size: 13px; min-height: 100vh; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Header */
+    .header { background: var(--bg-800); border-bottom: 1px solid var(--bg-700); padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .logo { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .logo i { color: white; }
+    .title { font-size: 16px; font-weight: bold; color: var(--white); }
+    .title span { color: var(--accent); font-size: 11px; margin-left: 4px; }
+    .subtitle { color: var(--muted); font-size: 11px; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .status-dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .status-dot.red { background: var(--red); }
+    .status-text { font-size: 11px; }
+
+    /* Layout */
+    .layout { display: flex; min-height: calc(100vh - 56px); }
+    .sidebar { width: 200px; background: var(--bg-800); border-right: 1px solid var(--bg-700); padding: 12px; position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; flex-shrink: 0; }
+    .main { flex: 1; padding: 20px; overflow-y: auto; }
+
+    /* Nav */
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 6px; cursor: pointer; color: var(--muted); transition: all 0.15s; margin-bottom: 4px; }
+    .nav-item:hover { background: var(--bg-700); color: var(--text); }
+    .nav-item.active { background: rgba(59,130,246,0.15); color: var(--accent); border-left: 3px solid var(--accent); }
+    .nav-item i { width: 16px; text-align: center; }
+    .nav-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--bg-700); }
+    .nav-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; padding: 0 12px; margin-bottom: 8px; }
+
+    /* Buttons */
+    .btn { padding: 8px 14px; border-radius: 6px; border: none; cursor: pointer; font-family: inherit; font-size: 12px; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-green { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+    .btn-green:hover:not(:disabled) { background: rgba(34,197,94,0.25); }
+    .btn-blue { background: rgba(59,130,246,0.15); color: var(--accent); border: 1px solid rgba(59,130,246,0.3); }
+    .btn-blue:hover:not(:disabled) { background: rgba(59,130,246,0.25); }
+    .btn-red { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+    .btn-red:hover:not(:disabled) { background: rgba(239,68,68,0.25); }
+    .btn-dark { background: var(--bg-700); color: var(--text); border: 1px solid var(--bg-600); }
+    .btn-dark:hover { background: var(--bg-600); }
+    .btn-sm { padding: 4px 10px; font-size: 11px; }
+
+    /* Cards */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: var(--bg-800); border: 1px solid var(--bg-700); border-radius: 10px; padding: 16px; }
+    .stat-card.green { border-color: rgba(34,197,94,0.3); box-shadow: 0 0 12px rgba(34,197,94,0.15); }
+    .stat-card.red { border-color: rgba(239,68,68,0.3); box-shadow: 0 0 12px rgba(239,68,68,0.15); }
+    .stat-card.blue { border-color: rgba(59,130,246,0.2); }
+    .stat-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .stat-value { font-size: 28px; font-weight: bold; color: var(--white); }
+    .stat-sub { color: var(--muted); font-size: 11px; margin-top: 4px; }
+    .stat-sub span { color: var(--accent); }
+
+    /* Panel */
+    .panel { background: var(--bg-800); border: 1px solid var(--bg-700); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+    .panel-header { padding: 12px 16px; border-bottom: 1px solid var(--bg-700); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 13px; font-weight: bold; color: var(--white); display: flex; align-items: center; gap: 8px; }
+    .panel-title i { color: var(--accent); }
+    .panel-body { padding: 16px; }
+    .panel-toolbar { display: flex; gap: 8px; align-items: center; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 8px 12px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; background: var(--bg-900); border-bottom: 1px solid var(--bg-700); }
+    td { padding: 8px 12px; border-bottom: 1px solid rgba(51,65,85,0.5); vertical-align: middle; }
+    tr:hover td { background: rgba(59,130,246,0.05); }
+    .mono { font-family: 'Courier New', monospace; }
+    .badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; }
+    .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+    .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+    .badge-yellow { background: rgba(234,179,8,0.15); color: var(--yellow); }
+    .badge-blue { background: rgba(59,130,246,0.15); color: var(--accent); }
+    .badge-cyan { background: rgba(6,182,212,0.15); color: var(--cyan); }
+    .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .dot-green { background: var(--green); }
+    .dot-red { background: var(--red); }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+    .empty-state i { font-size: 32px; margin-bottom: 12px; display: block; }
+    .empty-state strong { color: var(--green); }
+
+    /* Inputs */
+    input, select { background: var(--bg-700); border: 1px solid var(--bg-600); color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 12px; font-family: inherit; }
+    input:focus, select:focus { outline: none; border-color: var(--accent); }
+    input::placeholder { color: var(--muted); }
+
+    /* Form */
+    .form-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .form-row input { width: 140px; }
+    .form-row input[type="number"] { width: 80px; }
+    .form-row select { width: 100px; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; font-size: 12px; z-index: 9999; transform: translateY(100px); opacity: 0; transition: all 0.3s; max-width: 320px; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-success { background: var(--green); color: #000; }
+    .toast-error { background: var(--red); color: white; }
+    .toast-info { background: var(--accent); color: white; }
+
+    /* Loading spinner */
+    .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Log entry */
+    .log-entry { display: grid; grid-template-columns: 100px 100px 1fr 120px 1fr; gap: 12px; padding: 6px 12px; border-bottom: 1px solid var(--bg-700); font-size: 11px; }
+    .log-entry:hover { background: rgba(59,130,246,0.05); }
+    .log-time { color: var(--muted); }
+    .log-action { padding: 2px 8px; border-radius: 4px; font-size: 10px; width: fit-content; }
+    .log-proxy { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .log-result { color: var(--text); }
+
+    /* Progress bar */
+    .progress-bar { height: 6px; background: var(--bg-700); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .sidebar { width: 160px; }
+    }
+    @media (max-width: 600px) {
+      .layout { flex-direction: column; }
+      .sidebar { width: 100%; position: static; height: auto; }
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Tab content */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Country bar */
+    .country-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .country-name { width: 80px; font-size: 11px; color: var(--muted); }
+    .country-bar { flex: 1; height: 8px; background: var(--bg-700); border-radius: 4px; overflow: hidden; }
+    .country-fill { height: 100%; background: var(--cyan); border-radius: 4px; }
+    .country-count { width: 30px; text-align: right; font-size: 11px; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo"><i class="fas fa-shield-halved"></i></div>
+      <div>
+        <div class="title">Proxy Rotator <span>v2.0</span></div>
+        <div class="subtitle">SB2 Admin Dashboard</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span id="dbStatus"><span class="status-dot red"></span><span class="status-text">Connecting...</span></span>
+      <button class="btn btn-dark btn-sm" onclick="refreshAll()"><i class="fas fa-sync-alt"></i> Refresh</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <nav>
+        <div class="nav-item active" data-tab="proxies" onclick="switchTab('proxies')">
+          <i class="fas fa-list"></i> Proxies
+        </div>
+        <div class="nav-item" data-tab="rotate" onclick="switchTab('rotate')">
+          <i class="fas fa-random"></i> Rotate
+        </div>
+        <div class="nav-item" data-tab="logs" onclick="switchTab('logs')">
+          <i class="fas fa-terminal"></i> Logs
+        </div>
+        <div class="nav-item" data-tab="manage" onclick="switchTab('manage')">
+          <i class="fas fa-cogs"></i> Manage
+        </div>
+        <div class="nav-item" data-tab="gmail" onclick="switchTab('gmail')">
+          <i class="fas fa-envelope"></i> Gmail
+        </div>
+      </nav>
+
+      <div class="nav-section">
+        <div class="nav-label">Quick Actions</div>
+        <button class="btn btn-green" style="width:100%; margin-bottom:8px;" id="btnFetch" onclick="fetchProxies()">
+          <i class="fas fa-download"></i> Fetch New Proxies
+        </button>
+        <button class="btn btn-blue" style="width:100%; margin-bottom:8px;" id="btnValidate" onclick="validateAll()">
+          <i class="fas fa-heartbeat"></i> Validate All
+        </button>
+        <button class="btn btn-red" style="width:100%; margin-bottom:8px;" onclick="clearDead()">
+          <i class="fas fa-broom"></i> Clear Dead
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-card green">
+          <div class="stat-label">ALIVE <i class="fas fa-check-circle" style="color:var(--green)"></i></div>
+          <div class="stat-value" id="statAlive">0</div>
+          <div class="stat-sub">working proxies</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">TOTAL <i class="fas fa-database" style="color:var(--accent)"></i></div>
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-sub">in database</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">SOURCES <i class="fas fa-globe" style="color:var(--cyan)"></i></div>
+          <div class="stat-value" id="statSources">0</div>
+          <div class="stat-sub" id="statSourcesList">-</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">DEAD <i class="fas fa-skull-crossbones" style="color:var(--red)"></i></div>
+          <div class="stat-value" id="statDead">0</div>
+          <div class="stat-sub">failed / removed</div>
+        </div>
+      </div>
+
+      <!-- TAB: PROXIES -->
+      <div id="tab-proxies" class="tab-content active">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fas fa-list"></i> Proxy List</div>
+            <div class="panel-toolbar">
+              <select id="filterSource" onchange="loadProxies()">
+                <option value="">All Sources</option>
+              </select>
+              <select id="sortField" onchange="loadProxies()">
+                <option value="latency">Sort: Latency</option>
+                <option value="fail_count">Sort: Fails</option>
+                <option value="country">Sort: Country</option>
+                <option value="created_at">Sort: Newest</option>
+              </select>
+              <button class="btn btn-dark btn-sm" onclick="loadProxies()"><i class="fas fa-search"></i></button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th><th>IP:Port</th><th>Proto</th><th>Anon</th><th>Country</th>
+                  <th>Latency</th><th>Status</th><th>Source</th><th>Fails</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="proxyTable"></tbody>
+            </table>
+          </div>
+          <div style="padding:10px 16px; border-top:1px solid var(--bg-700); display:flex; justify-content:space-between; font-size:11px; color:var(--muted);">
+            <span id="proxyCount">0 proxies shown</span>
+            <button class="btn btn-dark btn-sm" onclick="loadProxies()"><i class="fas fa-sync-alt"></i> Reload</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: ROTATE -->
+      <div id="tab-rotate" class="tab-content">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fas fa-random"></i> Rotate Test</div>
+          </div>
+          <div class="panel-body">
+            <div class="form-row" style="margin-bottom:16px;">
+              <select id="testMethod"><option>GET</option><option>POST</option></select>
+              <input id="testUrl" value="https://api.ipify.org?format=json" placeholder="Target URL" style="flex:1;" />
+              <button class="btn btn-blue" id="btnRotate" onclick="rotateTest()">
+                <i class="fas fa-rotate"></i> Run
+              </button>
+            </div>
+            <div id="rotateResult" style="display:none; background:var(--bg-900); border-radius:8px; padding:16px; border:1px solid var(--bg-700);">
+              <div id="rotateHeader" style="margin-bottom:12px;"></div>
+              <pre id="rotateBody" style="color:var(--muted); font-size:11px; overflow:auto; max-height:300px; white-space:pre-wrap; word-break:break-all;"></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fas fa-bullseye" style="color:var(--yellow)"></i> Multi-Proxy Probe</div>
+          </div>
+          <div class="panel-body">
+            <button class="btn btn-green" id="btnProbe" onclick="multiProbe()">
+              <i class="fas fa-crosshairs"></i> Probe 10 Proxies
+            </button>
+            <div id="probeResults" style="margin-top:16px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: LOGS -->
+      <div id="tab-logs" class="tab-content">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fas fa-terminal" style="color:var(--cyan)"></i> Activity Log</div>
+            <button class="btn btn-dark btn-sm" onclick="loadLogs()"><i class="fas fa-sync-alt"></i></button>
+          </div>
+          <div id="logContainer" style="max-height:500px; overflow-y:auto;"></div>
+        </div>
+      </div>
+
+      <!-- TAB: MANAGE -->
+      <div id="tab-manage" class="tab-content">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fas fa-plus-circle" style="color:var(--green)"></i> Add Proxy Manually</div>
+          </div>
+          <div class="panel-body">
+            <div class="form-row">
+              <input id="manualIp" placeholder="IP" />
+              <input id="manualPort" type="number" placeholder="Port" />
+              <select id="manualProto">
+                <option value="http">HTTP</option>
+                <option value="https">HTTPS</option>
+                <option value="socks4">SOCKS4</option>
+                <option value="socks5">SOCKS5</option>
+              </select>
+              <input id="manualCountry" placeholder="Country" />
+              <button class="btn btn-green" onclick="addManual()">
+                <i class="fas fa-plus"></i> Add
+              </button>
+            </div>
+            <div id="manualMsg" style="margin-top:10px; font-size:11px;"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fas fa-flag" style="color:var(--yellow)"></i> Top Countries</div>
+          </div>
+          <div class="panel-body" id="countryList">
+            <div class="empty-state"><i class="fas fa-chart-bar"></i> No data yet</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fas fa-bolt" style="color:var(--cyan)"></i> Bulk Operations</div>
+          </div>
+          <div class="panel-body">
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn btn-red" onclick="clearDead()">
+                <i class="fas fa-broom"></i> Clear Dead (<span id="deadCount">0</span>)
+              </button>
+              <button class="btn btn-dark" onclick="clearAll()">
+                <i class="fas fa-trash"></i> Clear All
+              </button>
+              <button class="btn btn-dark" onclick="exportCSV()">
+                <i class="fas fa-file-csv"></i> Export CSV
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: GMAIL -->
+      <div id="tab-gmail" class="tab-content">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fas fa-envelope" style="color:var(--accent)"></i> Gmail Account Creator</div>
+            <div class="panel-toolbar">
+              <button class="btn btn-dark btn-sm" onclick="loadGmailProxy()"><i class="fas fa-sync-alt"></i> Check Proxy</button>
+              <button class="btn btn-blue btn-sm" onclick="createGmailReal()"><i class="fas fa-robot"></i> Create Real</button>
+              <button class="btn btn-green btn-sm" onclick="connectGmailProxy()"><i class="fas fa-plug"></i> Connect Proxy</button>
+              <button class="btn btn-red btn-sm" onclick="disconnectGmailProxy()"><i class="fas fa-plug-circle-xmark"></i> Disconnect Proxy</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="gmailProxyCard" style="background:var(--bg-900);border:1px solid var(--bg-700);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;">
+              <div style="color:var(--muted);margin-bottom:6px;">Current proxy via rotator (anti-detect):</div>
+              <div id="gmailProxyInfo">Loading...</div>
+            </div>
+
+            <div class="panel" style="margin-bottom:16px;">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fas fa-list-check" style="color:var(--cyan)"></i> Setup Steps</div>
+              </div>
+              <div class="panel-body" style="font-size:12px;">
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bg-700);">
+                  <span id="gmailStep1" style="color:var(--muted);width:16px;">○</span> Anti-detect browser (Dolphin Anty / clean profile)
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bg-700);">
+                  <span id="gmailStep2" style="color:var(--muted);width:16px;">○</span> Configure proxy (SOCKS5 / HTTP-HTTPS, IP:port:login:password)
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bg-700);">
+                  <span id="gmailStep3" style="color:var(--muted);width:16px;">○</span> Sync timezone & locale with proxy country
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 0;">
+                  <span id="gmailStep4" style="color:var(--muted);width:16px;">○</span> Signup via clean/anonim mode (max 3-5 akun/hari per IP)
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <div class="panel-title"><i class="fas fa-user-plus" style="color:var(--green)"></i> Create Account</div>
+              </div>
+              <div class="panel-body">
+                <div class="form-row">
+                  <input id="gmailEmail" placeholder="New Gmail address (you@gmail.com)" />
+                  <input id="gmailPassword" type="password" placeholder="Password" />
+                  <button class="btn btn-green" onclick="createGmail()">
+                    <i class="fas fa-plus"></i> Create
+                  </button>
+                </div>
+                <div id="gmailResult" style="margin-top:12px; font-size:12px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let state = {
+  stats: { total: 0, alive: 0, dead: 0, sources: [], top_countries: [] },
+  proxies: [],
+  logs: [],
+  filterSource: '',
+  sortField: 'latency',
+  testing: null,
+  probing: false,
+  busy: false,
+};
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const api = path => fetch(path).then(r => r.json());
+const apiPost = (path, body) => fetch(path, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body || {}) }).then(r => r.json());
+
+// ── Init ───────────────────────────────────────────────────────────────────
+async function init() {
+  $('dbStatus').innerHTML = '<span class="status-dot green"></span><span class="status-text">DB Ready</span>';
+  await Promise.all([refreshStats(), loadProxies(), loadLogs(), loadGmailProxy()]);
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────────
+async function refreshStats() {
+  try {
+    state.stats = await api('/api/stats');
+    $('statAlive').textContent = state.stats.alive || 0;
+    $('statTotal').textContent = state.stats.total || 0;
+    $('statDead').textContent = state.stats.dead || 0;
+    $('deadCount').textContent = state.stats.dead || 0;
+    const srcs = state.stats.sources || [];
+    $('statSources').textContent = srcs.length;
+    $('statSourcesList').textContent = srcs.slice(0,3).map(s => s.name).join(', ') || '-';
+    renderCountries();
+  } catch(e) {
+    console.error('Stats error:', e);
+  }
+}
+
+function renderCountries() {
+  const list = state.stats.top_countries || [];
+  if (!list.length) { $('countryList').innerHTML = '<div class="empty-state"><i class="fas fa-chart-bar"></i> No country data</div>'; return; }
+  const max = Math.max(...list.map(c => c.count));
+  $('countryList').innerHTML = list.map(c => `
+    <div class="country-row">
+      <span class="country-name">${c.name || 'Unknown'}</span>
+      <div class="country-bar"><div class="country-fill" style="width:${(c.count/max*100).toFixed(0)}%"></div></div>
+      <span class="country-count">${c.count}</span>
+    </div>
+  `).join('');
+}
+
+// ── Proxies ────────────────────────────────────────────────────────────────
+async function loadProxies() {
+  const params = new URLSearchParams({ sort: state.sortField, order: 'asc', limit: 500 });
+  if (state.filterSource) params.set('source', state.filterSource);
+  try {
+    const r = await api('/api/proxies?' + params);
+    state.proxies = r.proxies || [];
+    renderProxies();
+  } catch(e) { console.error(e); }
+}
+
+function renderProxies() {
+  const tb = $('proxyTable');
+  if (!state.proxies.length) {
+    tb.innerHTML = '<tr><td colspan="10"><div class="empty-state"><i class="fas fa-search"></i>No proxies yet. Click <strong>Fetch New Proxies</strong> to get started.</div></td></tr>';
+    $('proxyCount').textContent = '0 proxies shown';
+    return;
+  }
+  tb.innerHTML = state.proxies.map(p => `
+    <tr>
+      <td style="color:var(--muted)">${p.id}</td>
+      <td class="mono" style="color:var(--white)">${p.ip}:${p.port}</td>
+      <td><span class="badge ${p.protocol === 'https' ? 'badge-green' : 'badge-yellow'}">${p.protocol}</span></td>
+      <td style="color:var(--muted)">${(p.anonymity||'').slice(0,10)}</td>
+      <td style="color:var(--muted)">${p.country || '—'}</td>
+      <td style="color:${p.latency_ms < 500 ? 'var(--green)' : p.latency_ms < 1500 ? 'var(--yellow)' : 'var(--red)'}">${p.is_alive && p.latency_ms ? p.latency_ms.toFixed(0)+'ms' : '—'}</td>
+      <td><span class="dot ${p.is_alive ? 'dot-green' : 'dot-red'}"></span>${p.is_alive ? 'Alive' : 'Dead'}</td>
+      <td style="color:var(--muted)">${p.source}</td>
+      <td>${p.fail_count > 0 ? '<span style="color:var(--red)">'+p.fail_count+'</span>' : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>
+        <button class="btn btn-dark btn-sm" onclick="testProxy(${p.id})" ${state.testing === p.id ? 'disabled' : ''} title="Test">
+          <i class="fas ${state.testing === p.id ? 'fa-spinner fa-spin' : 'fa-play'}"></i>
+        </button>
+        <button class="btn btn-red btn-sm" onclick="deleteProxy(${p.id})" title="Delete" style="margin-left:4px;">
+          <i class="fas fa-trash"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+  $('proxyCount').textContent = state.proxies.length + ' proxies shown';
+}
+
+async function testProxy(id) {
+  state.testing = id;
+  try {
+    const r = await apiPost('/api/proxies/' + id + '/test');
+    if (r.alive) toast('OK: ' + r.proxy_url + ' → ' + r.exit_ip + ' (' + r.latency_ms + 'ms)', 'success');
+    else toast('FAIL: ' + r.proxy_url, 'error');
+    await loadProxies();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+  state.testing = null;
+  renderProxies();
+}
+
+async function deleteProxy(id) {
+  if (!confirm('Delete proxy #' + id + '?')) return;
+  await api('/api/proxies/' + id, { method: 'DELETE' });
+  await Promise.all([loadProxies(), refreshStats()]);
+  toast('Proxy deleted', 'success');
+}
+
+// ── Fetch / Validate ───────────────────────────────────────────────────────
+async function fetchProxies() {
+  if (state.busy) return;
+  state.busy = true;
+  $('btnFetch').disabled = true;
+  $('btnFetch').innerHTML = '<span class="spinner"></span> Fetching...';
+  try {
+    const r = await apiPost('/api/proxies/fetch?limit=500');
+    toast('Fetched ' + r.fetched + ' proxies from ' + Object.keys(r.sources||{}).length + ' sources', 'success');
+    await Promise.all([refreshStats(), loadProxies()]);
+  } catch(e) { toast('Fetch failed: ' + e.message, 'error'); }
+  state.busy = false;
+  $('btnFetch').disabled = false;
+  $('btnFetch').innerHTML = '<i class="fas fa-download"></i> Fetch New Proxies';
+}
+
+async function validateAll() {
+  if (state.busy) return;
+  state.busy = true;
+  $('btnValidate').disabled = true;
+  $('btnValidate').innerHTML = '<span class="spinner"></span> Validating...';
+  try {
+    const r = await apiPost('/api/proxies/validate');
+    toast('Validated ' + r.validated + ' → ' + r.new_alive + ' new alive', 'success');
+    await Promise.all([refreshStats(), loadProxies()]);
+  } catch(e) { toast('Validation failed: ' + e.message, 'error'); }
+  state.busy = false;
+  $('btnValidate').disabled = false;
+  $('btnValidate').innerHTML = '<i class="fas fa-heartbeat"></i> Validate All';
+}
+
+// ── Rotate Test ────────────────────────────────────────────────────────────
+async function rotateTest() {
+  const url = $('testUrl').value || 'https://api.ipify.org?format=json';
+  const method = $('testMethod').value;
+  $('btnRotate').disabled = true;
+  $('btnRotate').innerHTML = '<span class="spinner"></span> Running...';
+  try {
+    const r = await fetch('/api/rotate/test?url=' + encodeURIComponent(url), { method }).then(r => r.json());
+    $('rotateResult').style.display = 'block';
+    if (r.error) {
+      $('rotateHeader').innerHTML = '<span style="color:var(--red)">Error: ' + r.error + '</span>';
+      $('rotateBody').textContent = JSON.stringify(r, null, 2);
+    } else {
+      const ip = (r.body || '').trim().replace(/"/g,'');
+      $('rotateHeader').innerHTML = '<span style="color:var(--green)">IP: ' + ip + '</span> <span style="color:var(--muted)">via ' + r.proxy + '</span>';
+      $('rotateBody').textContent = JSON.stringify(r, null, 2);
+    }
+  } catch(e) {
+    $('rotateResult').style.display = 'block';
+    $('rotateHeader').innerHTML = '<span style="color:var(--red)">Error</span>';
+    $('rotateBody').textContent = e.message;
+  }
+  $('btnRotate').disabled = false;
+  $('btnRotate').innerHTML = '<i class="fas fa-rotate"></i> Run';
+}
+
+async function multiProbe() {
+  if (state.probing) return;
+  state.probing = true;
+  $('btnProbe').disabled = true;
+  $('btnProbe').innerHTML = '<span class="spinner"></span> Probing...';
+  $('probeResults').innerHTML = '';
+  const targets = ['https://api.ipify.org?format=text','https://ifconfig.me/ip','https://icanhazip.com'];
+  for (let i = 0; i < 10; i++) {
+    try {
+      const r = await fetch('/api/rotate/test?url=' + encodeURIComponent(targets[i % targets.length])).then(r => r.json());
+      const ip = (r.body || '').trim().replace(/"/g,'');
+      const ok = !r.error;
+      $('probeResults').innerHTML += `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bg-700);font-size:11px;">
+        <span style="color:var(--muted);width:20px;">${i+1}</span>
+        <span style="color:${ok?'var(--green)':'var(--red)'}">${ok?'✓':'✗'}</span>
+        <span class="mono" style="color:var(--white);flex:1;">${r.proxy||'error'}</span>
+        <span style="color:var(--muted);">${ip||r.error||''}</span>
+        <span style="color:var(--muted);">${r.latency_ms ? r.latency_ms.toFixed(0)+'ms' : ''}</span>
+      </div>`;
+    } catch(e) {
+      $('probeResults').innerHTML += `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bg-700);font-size:11px;">
+        <span style="color:var(--muted);">${i+1}</span><span style="color:var(--red)">✗</span><span class="mono" style="color:var(--red);flex:1;">error</span><span style="color:var(--muted);">${e.message}</span></div>`;
+    }
+  }
+  state.probing = false;
+  $('btnProbe').disabled = false;
+  $('btnProbe').innerHTML = '<i class="fas fa-crosshairs"></i> Probe 10 Proxies';
+  toast('Probed 10 proxies', 'info');
+}
+
+// ── Logs ───────────────────────────────────────────────────────────────────
+async function loadLogs() {
+  try {
+    const r = await api('/api/logs?limit=200');
+    state.logs = r.logs || [];
+    renderLogs();
+  } catch(e) { console.error(e); }
+}
+
+function renderLogs() {
+  const c = $('logContainer');
+  if (!state.logs.length) { c.innerHTML = '<div class="empty-state"><i class="fas fa-terminal"></i>No activity yet</div>'; return; }
+  c.innerHTML = state.logs.map(l => {
+    const cls = l.action === 'GET' ? 'badge-blue' : l.action === 'POST' ? 'badge-yellow' : l.action.includes('fetch') || l.action.includes('validate') ? 'badge-green' : 'badge-red';
+    return `<div class="log-entry">
+      <span class="log-time">${new Date(l.created_at * 1000).toLocaleTimeString()}</span>
+      <span><span class="badge ${cls}">${l.action}</span></span>
+      <span class="log-proxy mono">${l.proxy || '—'}</span>
+      <span style="color:var(--muted)">${(l.target_ip||'—').slice(0,25)}</span>
+      <span class="log-result">${(l.result||'—').slice(0,50)}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── Manage ─────────────────────────────────────────────────────────────────
+async function addManual() {
+  const ip = $('manualIp').value.trim();
+  const port = $('manualPort').value.trim();
+  if (!ip || !port) { $('manualMsg').innerHTML = '<span style="color:var(--red)">IP and Port are required</span>'; return; }
+  try {
+    const body = [{ ip, port: parseInt(port), protocol: $('manualProto').value, country: $('manualCountry').value, source: 'manual' }];
+    await apiPost('/api/proxies/fetch?limit=1', body);
+    $('manualIp').value = ''; $('manualPort').value = ''; $('manualCountry').value = '';
+    $('manualMsg').innerHTML = '<span style="color:var(--green)">Added successfully!</span>';
+    await Promise.all([refreshStats(), loadProxies()]);
+    toast('Proxy added', 'success');
+  } catch(e) { $('manualMsg').innerHTML = '<span style="color:var(--red)">Error: ' + e.message + '</span>'; }
+}
+
+async function clearDead() {
+  if (!confirm('Remove all dead & high-fail proxies?')) return;
+  const r = await api('/api/proxies/clear-dead', { method: 'DELETE' });
+  toast('Removed ' + r.removed + ' dead proxies', 'success');
+  await Promise.all([refreshStats(), loadProxies()]);
+}
+
+async function clearAll() {
+  if (!confirm('DELETE ALL proxies? This cannot be undone!')) return;
+  await api('/api/proxies/clear-all', { method: 'DELETE' });
+  toast('All proxies cleared', 'success');
+  await Promise.all([refreshStats(), loadProxies()]);
+}
+
+function exportCSV() {
+  if (!state.proxies.length) { toast('No proxies to export', 'error'); return; }
+  const h = ['ID','IP','Port','Protocol','Anonymity','Country','Source','Latency','Alive','Fails'];
+  const rows = [h, ...state.proxies.map(p => [p.id,p.ip,p.port,p.protocol,p.anonymity,p.country,p.source,p.latency_ms,p.is_alive,p.fail_count])];
+  const csv = rows.map(r => r.map(v => '"' + v + '"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+  a.download = 'proxies_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+// ── Gmail Account Creator ───────────────────────────────────────────────────
+async function loadGmailProxy() {
+  const card = $('gmailProxyCard');
+  try {
+    const u = new URL('/api/rotate/test', window.location.origin);
+    u.searchParams.set('url', 'https://accounts.google.com');
+    const r = await api(u.toString());
+    if (r.error || r.status === 0) {
+      card.innerHTML = '<div style="color:var(--red)">No alive proxy available for Gmail.</div>';
+      return;
+    }
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span class="status-dot ${r.status === 200 ? 'green' : 'red'}"></span>
+        <span style="color:var(--muted)">Proxy:</span>
+        <span class="mono" style="color:var(--white);flex:1;">${r.proxy}</span>
+        <span style="color:${r.status === 200 ? 'var(--green)' : 'var(--red)'}">${r.status}</span>
+      </div>
+      <div style="color:var(--muted);font-size:11px;">Target: https://accounts.google.com</div>`;
+  } catch(e) { card.innerHTML = '<div style="color:var(--red)">Error: ' + e.message + '</div>'; }
+}
+
+async function createGmail() {
+  const email = $('gmailEmail').value.trim();
+  const password = $('gmailPassword').value;
+  if (!email || !password) { toast('Email & password required', 'error'); return; }
+  const r = await apiPost('/api/gmail/create', { email, password });
+  const res = $('gmailResult');
+  res.innerHTML = '<div style="background:var(--bg-900);border:1px solid var(--bg-700);border-radius:8px;padding:12px;font-size:12px;">' +
+    '<div>Email: <span class="mono" style="color:var(--white)">' + r.email + '</span></div>' +
+    '<div>Proxy: <span class="mono" style="color:var(--white)">' + (r.proxy || '—') + '</span></div>' +
+    '<div>Status: <span style="color:' + (r.ok ? 'var(--green)' : 'var(--red)') + '">' + r.status + '</span></div>' +
+    '</div>';
+  toast(r.ok ? 'Gmail flow executed via proxy' : 'Gmail flow failed', r.ok ? 'success' : 'error');
+}
+
+async function createGmailReal() {
+  const email = $('gmailEmail').value.trim();
+  const password = $('gmailPassword').value;
+  if (!email || !password) { toast('Email & password required', 'error'); return; }
+    const r = await apiPost('/api/gmail/create-real', { email, password });
+  const res = $('gmailResult');
+  res.innerHTML = '<div style="background:var(--bg-900);border:1px solid var(--bg-700);border-radius:8px;padding:12px;font-size:12px;">' +
+    '<div>Email: <span class="mono" style="color:var(--white)">' + (r.email || email) + '</span></div>' +
+    '<div>Proxy: <span class="mono" style="color:var(--white)">' + (r.proxy || '—') + '</span></div>' +
+    '<div>Real Browser (Playwright): <span style="color:' + (r.ok ? 'var(--green)' : 'var(--red)') + '">' + (r.ok ? 'OK' : 'FAIL') + '</span></span></div>' +
+    '<div>Detail: <span style="color:var(--muted)">' + (r.detail || '') + '</span></div>' +
+    '</div>';
+  toast(r.ok ? 'Gmail real browser automation executed' : 'Gmail real browser automation failed', r.ok ? 'success' : 'error');
+}
+
+async function connectGmailProxy() {
+  const r = await apiPost('/api/gmail/connect', {});
+  const card = $('gmailProxyCard');
+  card.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span class="status-dot ${r.status === 200 ? 'green' : 'red'}"></span>
+      <span style="color:var(--muted)">Proxy:</span>
+      <span class="mono" style="color:var(--white);flex:1;">${r.proxy || '—'}</span>
+      <span style="color:${r.status === 200 ? 'var(--green)' : 'var(--red)'}">${r.status}</span>
+    </div>
+    <div style="color:var(--muted);font-size:11px;">Connected via rotator</div>`;
+  toast('Proxy connected', 'success');
+}
+
+async function disconnectGmailProxy() {
+  const r = await apiPost('/api/gmail/disconnect', {});
+  const card = $('gmailProxyCard');
+  card.innerHTML = '<div style="color:var(--muted);font-size:12px;">Proxy disconnected — no alive proxies for Gmail.</div>';
+  toast('Proxy disconnected', 'success');
+  await refreshStats();
+}
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab === name));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
+  if (name === 'logs') loadLogs();
+  if (name === 'manage') refreshStats();
+  if (name === 'gmail') loadGmailProxy();
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function toast(msg, type = 'info') {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast toast-' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Full Refresh ───────────────────────────────────────────────────────────
+async function refreshAll() {
+  await Promise.all([refreshStats(), loadProxies(), loadLogs()]);
+  toast('Refreshed', 'info');
+}
+
+// ── Source Filter ──────────────────────────────────────────────────────────
+function updateSourceFilter() {
+  const sel = $('filterSource');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">All Sources</option>';
+  (state.stats.sources || []).forEach(s => {
+    sel.innerHTML += '<option value="' + s.name + '">' + s.name + '</option>';
+  });
+  sel.value = cur;
+}
+
+// Override loadProxies to also update filter
+const _origLoadProxies = loadProxies;
+loadProxies = async function() {
+  await _origLoadProxies();
+  updateSourceFilter();
+};
+
+// ── Start ──────────────────────────────────────────────────────────────────
+init().catch(console.error);
+</script>
+</body>
+</html>
