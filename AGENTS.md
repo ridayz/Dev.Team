@@ -19,6 +19,7 @@ Dev.Team/
 │       ├── tests/         ← tests
 │       └── docs/          ← project-specific notes
 ├── templates/new-project/ ← new project template
+├── tools/                 ← binary pihak ketiga (winbox/)
 ├── docs/
 │   ├── decisions/         ← why a decision was made
 │   ├── diagrams/          ← archify results
@@ -36,6 +37,7 @@ Dev.Team/
 | Diagrams (archify) | `docs/diagrams/` | inside project |
 | Architecture decisions | `docs/decisions/` | project README |
 | Helper scripts | `scripts/` | `src/` |
+| Scratch / temp files | `D:\tmp\<project>/` | `C:\` (flagged by EDR) |
 | New skill | `.opencode/skills/<id>/SKILL.md` | inside project |
 
 ## Hard Rules
@@ -45,6 +47,23 @@ Dev.Team/
 3. **Do not delete existing projects.** Mark them `done` or `paused` in the index.
 4. **Do not put secrets** (`.env`, token, password) in the repo. Use `.env.example`.
 5. **Do not put large files** (ISO, zip, video) in the HQ. Store outside.
+
+## Shell & EDR Hygiene
+
+Endpoint security (EDR) reads "PowerShell wrote a script to Temp, then ran it with `-File`" as malware staging (MITRE T1036). Never produce that pattern, even for legitimate work.
+
+**Never:**
+- Write `.ps1` / `.bat` / `.cmd` into a temp folder and execute it.
+- Use `-ExecutionPolicy Bypass`, `-WindowStyle Hidden`, `-EncodedCommand`, `iex`, `iwr ... | iex`, or base64 payloads.
+- Create files through shell heredocs (`@'...'@ | Set-Content`) when `write`/`edit` exists.
+- Use vague or obfuscated names (`_final.ps1`, `tmp1.ps1`, `probe_x`).
+
+**Always:**
+- Create files with the `write`/`edit` tool, then run them with `node` (or the project's own runner).
+- Keep helper scripts in `projects/<project>/scripts/` (committed) or `D:\tmp\<project>/` (throwaway), never `%TEMP%`.
+- Name files by intent: `probe-image.mjs`, `verify-iso.mjs`.
+- Use the shell only for what needs a shell (git, node, build), with short readable commands.
+- Say in the final report where scratch files live, so the user can delete them.
 
 ## Expected Workflow
 

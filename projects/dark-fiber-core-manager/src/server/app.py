@@ -291,11 +291,21 @@ class Handler(BaseHTTPRequestHandler):
             super().log_message(fmt, *args)
 
 
+class Server(ThreadingHTTPServer):
+    """Browser reload/tab-close aborts a socket; that is not an error worth a traceback."""
+
+    def handle_error(self, request, client_address) -> None:
+        exc = sys.exc_info()[1]
+        if isinstance(exc, (ConnectionResetError, ConnectionAbortedError, BrokenPipeError)):
+            return
+        super().handle_error(request, client_address)
+
+
 def main() -> None:
     port = int(os.environ.get("PORT", DEFAULT_PORT))
     store.init_db()
     threading.Thread(target=sheets.background_loop, name="sheet-sync", daemon=True).start()
-    httpd = ThreadingHTTPServer(("0.0.0.0", port), Handler)
+    httpd = Server(("0.0.0.0", port), Handler)
     print(f"Dark Fiber Core Manager  →  http://localhost:{port}")
     print(f"Database                 →  {store.DB_PATH}")
     print(f"Sheet sync               →  tiap {sheets.POLL_SECONDS}s (read-only)")

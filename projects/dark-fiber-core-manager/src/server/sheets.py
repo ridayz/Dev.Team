@@ -17,6 +17,7 @@ import io
 import json
 import os
 import re
+import sys
 import threading
 import time
 import urllib.error
@@ -24,6 +25,15 @@ import urllib.request
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
+
+# A Windows console defaults to cp1252 and raises UnicodeEncodeError on the
+# arrow characters this module logs, which used to abort a whole sync. Force
+# UTF-8 with replacement so logging can never break the sync or the tests.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
 
 SPREADSHEET_ID = os.environ.get(
     "SHEET_ID", "19n4TKBRU85SikjXjnT_cYsY559am51TgbOV2wOp6570"

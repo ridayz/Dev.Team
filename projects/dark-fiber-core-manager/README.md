@@ -4,7 +4,7 @@
 | --- | --- |
 | **Status** | `review` |
 | **Created** | 2026-11-09 |
-| **Last touched** | 2026-11-09 |
+| **Last touched** | 2026-11-13 |
 
 ## Purpose
 
@@ -32,20 +32,43 @@ Dashboard ini adalah versi baru dari `backbone-core-dashboard`. Versi lama tidak
 
 ## Cara Menjalankan
 
-Butuh Python 3.10+ (lingkungan ini memakai Python 3.12). Tidak perlu install paket.
+Butuh Python 3.10+ (mesin ini memakai Python 3.12 di `D:\tools\python312`). Tidak perlu install paket.
+
+**Windows, cukup klik dua kali** `Dark Fiber Manager.exe` (atau shortcut Desktop-nya). Launcher menjalankan server tanpa jendela konsol di port 4174, menunggu port siap, lalu membuka browser sendiri. Ikon tray bisa dipakai untuk membuka lagi atau menghentikan server. Bila `.exe` belum ada, build dulu:
+
+```bat
+scripts\native-launcher\build.cmd
+```
+
+**Dari terminal (Windows):**
+
+```bat
+cd projects\dark-fiber-core-manager
+run.cmd
+```
+
+Port default 4173, tapi port itu dipakai `free-model-radar`, jadi di mesin ini jalankan di 4174:
+
+```bat
+set PORT=4174 && run.cmd
+```
+
+Linux / Git Bash:
 
 ```bash
 cd projects/dark-fiber-core-manager
 ./run.sh
 ```
 
-Buka **http://localhost:4173**.
-
 Port lain:
 
 ```bash
 PORT=8080 ./run.sh
 ```
+
+`run.cmd` otomatis memakai `D:\tools\python312\python.exe` bila ada, lalu jatuh ke `python` di PATH. Launcher ini juga mengeset `PYTHONIOENCODING=utf-8`, karena konsol Windows (cp1252) tidak bisa mencetak karakter panah di log sync. Log launcher `.exe`: `%LOCALAPPDATA%\Dev.Team\logs\server-4174.log`.
+
+Buka **http://localhost:4174** (atau 4173 kalau dijalankan tanpa `PORT`).
 
 Database SQLite dibuat otomatis di `src/server/darkfiber.db` saat pertama kali dijalankan. Untuk mengulang data demo dari awal:
 

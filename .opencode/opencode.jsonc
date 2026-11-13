@@ -1,17 +1,74 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  // 15 model free+smart dari katalog localhost:9100 (ai-scraper DB)
-  // isSmart=1 (ctx >=200k / multimodal) + alive=1, urut tercepat
-  // baseURL tetap ke upstream OpenRouter — localhost:9100 hanya katalog,
-  // bukan endpoint inference (tidak ada /v1/chat/completions).
-  "model": "openrouter/nemotron-3-5-lightning-free",
+  // Model OpenRouter free sesuai bench/radar http://127.0.0.1:4173 (13 model)
+  "model": "openrouter/nvidia-nemotron-3-5-lightning-free",
   "providers": {
     "openrouter": {
       "models": {
-        "nemotron-3-5-lightning-free": {
+        "thinkingmachines-inkling-2-small-free": {
+          "modelID": "thinkingmachines/inkling-2-small:free",
+          "name": "Thinking Machines: Inkling 2 Small (free)",
+          "limit": { "context": 1048576 }
+        },
+        "nvidia-nemotron-3-5-super-vl-free": {
+          "modelID": "nvidia/nemotron-3.5-super-vl:free",
+          "name": "NVIDIA: Nemotron 3.5 Super VL (free)",
+          "limit": { "context": 1000000 }
+        },
+        "nvidia-nemotron-3-ultra-550b-a55b-free": {
+          "modelID": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "name": "NVIDIA: Nemotron 3 Ultra (free)",
+          "limit": { "context": 1000000 }
+        },
+        "nvidia-nemotron-3-5-lightning-free": {
           "modelID": "nvidia/nemotron-3.5-lightning:free",
           "name": "NVIDIA: Nemotron 3.5 Lightning (free)",
           "limit": { "context": 1000000 }
+        },
+        "google-gemma-4-31b-it-free": {
+          "modelID": "google/gemma-4-31b-it:free",
+          "name": "Google: Gemma 4 31B (free)",
+          "limit": { "context": 262144 }
+        },
+        "cohere-north-mini-code-free": {
+          "modelID": "cohere/north-mini-code:free",
+          "name": "Cohere: North Mini Code (free)",
+          "limit": { "context": 256000 }
+        },
+        "liquid-lfm-3-1-7b-free": {
+          "modelID": "liquid/lfm-3-1.7b:free",
+          "name": "LiquidAI: LFM3-1.7B (free)",
+          "limit": { "context": 262144 }
+        },
+        "recursive-flint-v1-0-free": {
+          "modelID": "recursive/flint-v1.0:free",
+          "name": "Recursive: Flint (free)",
+          "limit": { "context": 262144 }
+        },
+        "dots-studio-dots-3-note-preview-free": {
+          "modelID": "dots-studio/dots-3-note-preview:free",
+          "name": "Dots Studio: Dots3-Note Preview (free)",
+          "limit": { "context": 512000 }
+        },
+        "liquid-lfm-2-5-2-6b-free": {
+          "modelID": "liquid/lfm-2.5-2.6b:free",
+          "name": "LiquidAI: LFM2.5-2.6B (free)",
+          "limit": { "context": 65536 }
+        },
+        "nvidia-nemotron-3-nano-omni-30b-a3b-reasoning-free": {
+          "modelID": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+          "name": "NVIDIA: Nemotron 3 Nano Omni (free)",
+          "limit": { "context": 256000 }
+        },
+        "google-gemma-4-26b-a4b-it-free": {
+          "modelID": "google/gemma-4-26b-a4b-it:free",
+          "name": "Google: Gemma 4 26B A4B  (free)",
+          "limit": { "context": 262144 }
+        },
+        "openrouter-free": {
+          "modelID": "openrouter/free",
+          "name": "Free Models Router",
+          "limit": { "context": 200000 }
         }
       }
     }

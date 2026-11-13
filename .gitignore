@@ -24,7 +24,12 @@ Thumbs.db
 *.tar.gz
 *.iso
 *.db
+tools/winbox/*.exe
 
 # Python cache
 __pycache__/
 *.pyc
+
+# Proyek standalone (punya repo sendiri)
+projects/free-model-radar/
+
