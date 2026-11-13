@@ -10,7 +10,7 @@ Dev.Team/
 ├── README.md              ← human guide
 ├── .opencode/
 │   ├── agents/            ← agent definitions
-│   └── skills/            ← skills (archify, unslop, ...)
+│   └── skills/            ← skills (archify, unslop, design-language, ...)
 ├── projects/              ← all projects
 │   ├── README.md          ← index + status
 │   └── <project-name>/
@@ -21,7 +21,6 @@ Dev.Team/
 ├── templates/new-project/ ← new project template
 ├── tools/                 ← binary pihak ketiga (winbox/)
 ├── docs/
-│   ├── design-language.md ← aturan UI: token, larangan slop, checklist
 │   ├── decisions/         ← why a decision was made
 │   ├── diagrams/          ← archify results
 │   └── notes/             ← cross-project notes

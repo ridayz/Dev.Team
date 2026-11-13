@@ -34,6 +34,7 @@ Skills are loaded via the `skill` tool with **ID** (folder name, case-sensitive)
 | ID | Purpose |
 | --- | --- |
 | `archify` | Interactive HTML diagrams (architecture/workflow/sequence/data-flow/lifecycle/ERD/tree/timeline/waterfall) + one-page explainer. |
+| `design-language` | Dev.Team UI rules: 5-line direction, color/type/motion tokens, nine fix passes, slop ban list. Load before building or restyling any interface. |
 | `unslop` | Clean up UI that looks "AI-generated" (purple gradient, glow, emoji labels, uneven spacing). For React, Tailwind, HTML, CSS. |
 
 Usage rules:
