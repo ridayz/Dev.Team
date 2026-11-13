@@ -21,10 +21,11 @@ Dev.Team/
 ├── templates/new-project/ ← new project template
 ├── tools/                 ← binary pihak ketiga (winbox/)
 ├── docs/
+│   ├── design-language.md ← aturan UI: token, larangan slop, checklist
 │   ├── decisions/         ← why a decision was made
 │   ├── diagrams/          ← archify results
 │   └── notes/             ← cross-project notes
-└── scripts/               ← helpers (new-project.sh)
+└── scripts/               ← helpers (new-project.sh, native-launcher/)
 ```
 
 ## File Placement Rules
